@@ -1,3 +1,5 @@
+import "./FormProduct.css";
+
 // hooks
 import { useEffect, useState, FormEvent, ChangeEvent, } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -8,14 +10,20 @@ import { url } from "../config/api";
 // interfaces
 import { IProductRequest } from "../interfaces/IProductRequest";
 
+// context 
+import { useLoading } from "../context/useLoading";
 
 const FormProduct = () => {
+
+  const { loading, setLoading } = useLoading();
 
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(0);
 
   const { id } = useParams();
+
+  const redirect = useNavigate();
 
   useEffect(() => {
 
@@ -51,6 +59,8 @@ const FormProduct = () => {
       quantity: quantity
     }
 
+    setLoading(true)
+
     if(id){
 
       await fetch(url + "/products/" + id, {
@@ -64,9 +74,12 @@ const FormProduct = () => {
         return res.json();
       }).then((resJSON) => {
         clearStates();
+        redirect("/")
         console.log(resJSON.data);
       }).catch((err) => {
         console.log(err)
+      }).finally(() => {
+        setLoading(false)
       })
 
     }else{
@@ -82,9 +95,12 @@ const FormProduct = () => {
         return res.json();
       }).then((resJSON) => {
         clearStates();
+        redirect("/")
         console.log(resJSON.data);
       }).catch((err) => {
         console.log(err)
+      }).finally(() => {
+        setLoading(false)
       })
     }
 
@@ -107,15 +123,17 @@ const FormProduct = () => {
   }
 
   return (
-    <div>
+    <div className="form-product">
 
-      {id ? (
-        <h1>Atualizar Produto</h1>
-      ): (
-        <h1>Cadastrar Produto</h1>
-      )}
-      
-      <Link to="/">Home</Link>
+      <section>
+        {id ? (
+          <h1>Atualizar Produto</h1>
+        ): (
+          <h1>Cadastrar Produto</h1>
+        )}
+        
+        <Link to="/">Voltar</Link>
+      </section>
 
       <form onSubmit={ handleSubmit }>
         <div className="box-input-product">
@@ -130,8 +148,14 @@ const FormProduct = () => {
           <label htmlFor="quantity">Quantidade do Produto: </label>
           <input type="number" placeholder="Digite a quantidade em estoque" name="quantity" id="quantity" onChange={ handleChange } value={quantity || ""} />
         </div>
-        <input type="submit" value="Salvar" />
+        { loading ? (
+          <input id="save" type="button" value="Aguarde..." disabled />
+        ): (
+          <input id="save" type="submit" value="Salvar" />
+        )}
+        
       </form>
+
 
     </div>
   )

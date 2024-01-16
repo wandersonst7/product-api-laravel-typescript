@@ -1,0 +1,22 @@
+.home{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.home section{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    color: #222;
+}
+
+.home .products{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 24px;
+}

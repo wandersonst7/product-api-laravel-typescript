@@ -1,6 +1,11 @@
+import "./Home.css";
+
+// components
+import ProductItem from "../components/ProductItem";
+
 // hooks
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 // config
 import { url } from "../config/api";
@@ -8,7 +13,12 @@ import { url } from "../config/api";
 // interfaces
 import { IProductResponse } from "../interfaces/IProductResponse";
 
+// context 
+import { useLoading } from "../context/useLoading";
+
 const Home = () => {
+
+  const { loading, setLoading } = useLoading();
 
   const [products, setProducts] = useState<IProductResponse[]>([])
 
@@ -16,6 +26,7 @@ const Home = () => {
 
     async function getAllProducts(){
 
+      setLoading(true)
       await fetch(url + "/products", {
         method: "GET",
         headers: {
@@ -28,7 +39,9 @@ const Home = () => {
       })
       .catch((err) => {
         console.log(err)
-      });
+      }).finally(() => {
+        setLoading(false)
+      })
         
     }
 
@@ -38,6 +51,9 @@ const Home = () => {
   }, [])
 
   async function handleDelete(id: number){
+
+    setLoading(true)
+
     await fetch(url + "/products/" + id, {
       method: "DELETE",
       headers: {
@@ -50,24 +66,30 @@ const Home = () => {
       setProducts(products.filter((product) => product.id !== id));
     }).catch((err) => {
       console.log(err)
+    }).finally(() => {
+      setLoading(false)
     })
     
   }
 
+  if(loading){
+    return <p>Carregando...</p>
+  }
+
   return (
-    <>
-      <h1>Home</h1>
-      <Link to="/product">Cadastrar Produto</Link>
-      { products && products.map((product) => (
-        <div key={product.id}>
-          <h3>{ product.name }</h3>
-          <p>{ product.price }</p>
-          <p>{ product.quantity }</p>
-          <Link to={`/product/${product.id}`}>Editar</Link>
-          <button onClick={ () => handleDelete(product.id) }>Excluir Produto</button>
-        </div>
-      ))}
-    </>
+    <div className="home">
+      <section>
+        <h1>Home</h1>
+        <Link to="/product">Cadastrar Produto</Link>
+      </section>
+
+      <div className="products">
+        { products && products.map((product) => (
+            <ProductItem key={product.id} handleDelete={handleDelete} product={product}/>
+        ))}
+      </div>
+      
+    </div>
   )
 }
 
